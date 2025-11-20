@@ -3,18 +3,22 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Check, Loader2 } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../services/api';
-import { useAppDispatch } from '../store/store';
+import { useAppDispatch, useAppSelector } from '../store/store';
 import { addToCart } from '../store/cartSlice';
+import { fetchProducts } from '../store/productSlice';
+import ProductCard from '../components/ProductCard';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
+  const { items: allProducts, status: globalStatus } = useAppSelector(state => state.products);
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
 
+  // Fetch the specific product details
   useEffect(() => {
     const loadProduct = async () => {
       if (!id) return;
@@ -31,6 +35,13 @@ const ProductDetails: React.FC = () => {
     loadProduct();
   }, [id]);
 
+  // Ensure global products are loaded for "Related Products"
+  useEffect(() => {
+    if (globalStatus === 'idle') {
+      dispatch(fetchProducts());
+    }
+  }, [globalStatus, dispatch]);
+
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart(product));
@@ -38,6 +49,11 @@ const ProductDetails: React.FC = () => {
       setTimeout(() => setAdded(false), 2000);
     }
   };
+
+  // Get related products
+  const relatedProducts = allProducts
+    .filter(p => product && p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
 
   if (loading) {
     return (
@@ -63,7 +79,7 @@ const ProductDetails: React.FC = () => {
         Back to Products
       </Link>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-16">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Section */}
           <div className="p-8 md:p-12 bg-white flex items-center justify-center border-b md:border-b-0 md:border-r border-slate-100">
@@ -126,6 +142,18 @@ const ProductDetails: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">You might also like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map(related => (
+              <ProductCard key={related.id} product={related} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,25 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, ShoppingBag } from 'lucide-react';
-import { useAppSelector } from '../store/store';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ShoppingCart, ShoppingBag, Search, X } from 'lucide-react';
+import { useAppSelector, useAppDispatch } from '../store/store';
 import { selectCartTotalCount } from '../store/cartSlice';
+import { setSearchTerm } from '../store/productSlice';
 
 const Navbar: React.FC = () => {
   const cartCount = useAppSelector(selectCartTotalCount);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    dispatch(setSearchTerm(value));
+    
+    if (value && location.pathname !== '/') {
+      navigate('/');
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchValue('');
+    dispatch(setSearchTerm(''));
+  };
 
   return (
     <nav className="bg-white sticky top-0 z-50 shadow-sm border-b border-slate-100">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-brand-600 hover:text-brand-700 transition-colors">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-brand-600 hover:text-brand-700 transition-colors flex-shrink-0"
+          onClick={clearSearch}
+        >
           <ShoppingBag className="h-8 w-8" />
-          <span className="font-bold text-xl tracking-tight text-slate-900">TechSurvi</span>
+          <span className="font-bold text-xl tracking-tight text-slate-900 hidden sm:block">TechSurvi</span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          <Link to="/" className="hidden md:block font-medium text-slate-600 hover:text-brand-600 transition-colors">
-            Products
-          </Link>
-          
+        <div className="flex-grow max-w-md relative">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              className="w-full py-2 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            {searchValue && (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 flex-shrink-0">
           <Link 
             to="/cart" 
             className="relative p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-all group"

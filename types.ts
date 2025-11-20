@@ -17,12 +17,16 @@ export interface CartItem extends Product {
 
 export type FetchStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
+export type SortOption = 'default' | 'price-asc' | 'price-desc' | 'rating-desc';
+
 export interface ProductsState {
   items: Product[];
   status: FetchStatus;
   error: string | null;
   categories: string[];
   selectedCategory: string;
+  searchTerm: string;
+  sortOption: SortOption;
 }
 
 export interface CartState {

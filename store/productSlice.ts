@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Product, ProductsState } from '../types';
+import { Product, ProductsState, SortOption } from '../types';
 import { api } from '../services/api';
 
 const initialState: ProductsState = {
@@ -8,6 +8,8 @@ const initialState: ProductsState = {
   error: null,
   categories: [],
   selectedCategory: 'all',
+  searchTerm: '',
+  sortOption: 'default',
 };
 
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
@@ -26,6 +28,12 @@ const productSlice = createSlice({
   reducers: {
     setSelectedCategory: (state, action: PayloadAction<string>) => {
       state.selectedCategory = action.payload;
+    },
+    setSearchTerm: (state, action: PayloadAction<string>) => {
+      state.searchTerm = action.payload;
+    },
+    setSortOption: (state, action: PayloadAction<SortOption>) => {
+      state.sortOption = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -47,5 +55,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { setSelectedCategory } = productSlice.actions;
+export const { setSelectedCategory, setSearchTerm, setSortOption } = productSlice.actions;
 export default productSlice.reducer;
