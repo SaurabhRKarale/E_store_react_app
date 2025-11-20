@@ -9,7 +9,7 @@ import Wishlist from './pages/Wishlist';
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-[100dvh] flex flex-col">
         <Navbar />
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>

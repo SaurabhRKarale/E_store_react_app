@@ -41,7 +41,8 @@ const Navbar: React.FC = () => {
           <span className="font-bold text-xl tracking-tight text-slate-900 hidden sm:block">TechSurvi</span>
         </Link>
 
-        <div className="flex-grow max-w-md relative hidden xs:block">
+        {/* Desktop Search Bar - Visible on MD and up */}
+        <div className="flex-grow max-w-md relative hidden md:block">
           <div className="relative">
             <input
               type="text"
@@ -88,8 +89,9 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
       </div>
-      {/* Mobile Search */}
-      <div className="container mx-auto px-4 pb-3 xs:hidden">
+      
+      {/* Mobile Search Bar - Visible below MD */}
+      <div className="container mx-auto px-4 pb-3 md:hidden">
         <div className="relative">
           <input
             type="text"
@@ -99,6 +101,14 @@ const Navbar: React.FC = () => {
             className="w-full py-2 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+          {searchValue && (
+            <button 
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
     </nav>
