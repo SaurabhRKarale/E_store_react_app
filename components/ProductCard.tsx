@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Plus } from 'lucide-react';
+import { Star, Plus, Heart } from 'lucide-react';
 import { Product } from '../types';
-import { useAppDispatch } from '../store/store';
+import { useAppDispatch, useAppSelector } from '../store/store';
 import { addToCart } from '../store/cartSlice';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '../store/wishlistSlice';
 
 interface ProductCardProps {
   product: Product;
@@ -11,14 +12,24 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useAppDispatch();
+  const isWishlisted = useAppSelector((state) => selectIsInWishlist(state, product.id));
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation if clicked on button
+    e.preventDefault(); 
     dispatch(addToCart(product));
   };
 
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isWishlisted) {
+      dispatch(removeFromWishlist(product.id));
+    } else {
+      dispatch(addToWishlist(product));
+    }
+  };
+
   return (
-    <div className="group flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-200 h-full">
+    <div className="group flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-200 h-full relative">
       <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-white p-6">
         <img
           src={product.image}
@@ -29,6 +40,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.category}
         </div>
       </Link>
+      
+      <button
+        onClick={handleToggleWishlist}
+        className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm text-slate-400 hover:text-red-500 hover:bg-white shadow-sm transition-all z-10"
+        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+      >
+        <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+      </button>
 
       <div className="p-4 flex flex-col flex-grow">
         <Link to={`/product/${product.id}`} className="block mb-2">

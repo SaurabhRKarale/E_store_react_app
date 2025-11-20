@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, ShoppingBag, Search, X } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, Search, X, Heart } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/store';
 import { selectCartTotalCount } from '../store/cartSlice';
+import { selectWishlistItems } from '../store/wishlistSlice';
 import { setSearchTerm } from '../store/productSlice';
 
 const Navbar: React.FC = () => {
   const cartCount = useAppSelector(selectCartTotalCount);
+  const wishlistItems = useAppSelector(selectWishlistItems);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,7 +41,7 @@ const Navbar: React.FC = () => {
           <span className="font-bold text-xl tracking-tight text-slate-900 hidden sm:block">TechSurvi</span>
         </Link>
 
-        <div className="flex-grow max-w-md relative">
+        <div className="flex-grow max-w-md relative hidden xs:block">
           <div className="relative">
             <input
               type="text"
@@ -60,10 +62,22 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <Link 
+            to="/wishlist" 
+            className="relative p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-all group"
+            title="Wishlist"
+          >
+            <Heart className="h-6 w-6" />
+            {wishlistItems.length > 0 && (
+              <span className="absolute top-1 right-1 block h-2.5 w-2.5 bg-brand-500 rounded-full ring-2 ring-white"></span>
+            )}
+          </Link>
+
           <Link 
             to="/cart" 
             className="relative p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-all group"
+            title="Cart"
           >
             <ShoppingCart className="h-6 w-6" />
             {cartCount > 0 && (
@@ -72,6 +86,19 @@ const Navbar: React.FC = () => {
               </span>
             )}
           </Link>
+        </div>
+      </div>
+      {/* Mobile Search */}
+      <div className="container mx-auto px-4 pb-3 xs:hidden">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchValue}
+            onChange={handleSearchChange}
+            className="w-full py-2 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
         </div>
       </div>
     </nav>

@@ -32,3 +32,7 @@ export interface ProductsState {
 export interface CartState {
   items: CartItem[];
 }
+
+export interface WishlistState {
+  items: Product[];
+}

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, ShoppingCart, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Star, ShoppingCart, Check, Loader2, Heart } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../services/api';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { addToCart } from '../store/cartSlice';
 import { fetchProducts } from '../store/productSlice';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '../store/wishlistSlice';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetails: React.FC = () => {
@@ -17,6 +18,9 @@ const ProductDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+
+  const productId = product?.id ? Number(product.id) : -1;
+  const isWishlisted = useAppSelector(state => selectIsInWishlist(state, productId));
 
   // Fetch the specific product details
   useEffect(() => {
@@ -47,6 +51,16 @@ const ProductDetails: React.FC = () => {
       dispatch(addToCart(product));
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (product) {
+      if (isWishlisted) {
+        dispatch(removeFromWishlist(product.id));
+      } else {
+        dispatch(addToWishlist(product));
+      }
     }
   };
 
@@ -116,11 +130,11 @@ const ProductDetails: React.FC = () => {
               <p>{product.description}</p>
             </div>
 
-            <div className="mt-auto">
+            <div className="mt-auto flex gap-3">
               <button
                 onClick={handleAddToCart}
                 disabled={added}
-                className={`w-full py-4 px-8 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all duration-200 ${
+                className={`flex-grow py-4 px-8 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all duration-200 ${
                   added
                     ? 'bg-green-600 text-white cursor-default'
                     : 'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg active:transform active:scale-[0.98]'
@@ -137,6 +151,18 @@ const ProductDetails: React.FC = () => {
                     Add to Cart
                   </>
                 )}
+              </button>
+
+              <button
+                onClick={handleToggleWishlist}
+                className={`w-16 rounded-xl flex items-center justify-center border-2 transition-all ${
+                  isWishlisted 
+                    ? 'border-red-500 bg-red-50 text-red-500' 
+                    : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                }`}
+                title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <Heart className={`h-6 w-6 ${isWishlisted ? 'fill-red-500' : ''}`} />
               </button>
             </div>
           </div>

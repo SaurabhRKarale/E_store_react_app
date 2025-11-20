@@ -1,13 +1,15 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { fetchProducts, fetchCategories, setSelectedCategory, setSortOption, setSearchTerm } from '../store/productSlice';
 import ProductCard from '../components/ProductCard';
-import { Loader2, AlertCircle, SlidersHorizontal } from 'lucide-react';
+import { Loader2, AlertCircle, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SortOption } from '../types';
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch();
   const { items, status, error, categories, selectedCategory, searchTerm, sortOption } = useAppSelector((state) => state.products);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     if (status === 'idle') {
@@ -15,6 +17,11 @@ const Home: React.FC = () => {
       dispatch(fetchCategories());
     }
   }, [status, dispatch]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm, sortOption]);
 
   const processedProducts = useMemo(() => {
     let result = [...items];
@@ -45,12 +52,24 @@ const Home: React.FC = () => {
         result.sort((a, b) => b.rating.rate - a.rating.rate);
         break;
       default:
-        // keep original order (usually by id or fetch order)
+        // keep original order
         break;
     }
 
     return result;
   }, [items, selectedCategory, searchTerm, sortOption]);
+
+  const totalPages = Math.ceil(processedProducts.length / itemsPerPage);
+  
+  const currentProducts = processedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (status === 'loading') {
     return (
@@ -152,11 +171,50 @@ const Home: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {processedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            {currentProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-5 w-5 text-slate-600" />
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-5 w-5 text-slate-600" />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
